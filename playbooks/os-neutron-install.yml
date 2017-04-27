@@ -156,3 +156,19 @@
     bind_prefix: "{{ provider_network_bind_prefix|default('') }}"
   tags:
     - neutron
+
+- name: OpenDaylight installation
+  hosts: neutron_all
+  roles:
+    # This config is specific to Ubuntu
+    - role: "opendaylight"
+      install_method: "deb_repo"
+      when:
+        - ansible_pkg_mgr == 'apt'
+        - inventory_hostname in groups['opendaylight'][0]
+    # This config is specific to CentOS
+    - role: "opendaylight"
+      install_method: "rpm_repo"
+      when:
+        - ansible_pkg_mgr == 'yum'
+        - inventory_hostname in groups['opendaylight'][0]
