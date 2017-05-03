@@ -165,10 +165,20 @@
       install_method: "deb_repo"
       when:
         - ansible_pkg_mgr == 'apt'
-        - inventory_hostname in groups['opendaylight'][0]
+        - inventory_hostname in groups['opendaylight']
     # This config is specific to CentOS
     - role: "opendaylight"
       install_method: "rpm_repo"
       when:
         - ansible_pkg_mgr == 'yum'
-        - inventory_hostname in groups['opendaylight'][0]
+        - inventory_hostname in groups['opendaylight']
+
+- name: Install python-networking-odl package
+  hosts: neutron_all
+  tasks:
+    - include: common-tasks/package-cache-proxy.yml
+    - name: Install python-networking-odl
+      package:
+        name: "python-networking-odl"
+        state: present
+      when: inventory_hostname in groups['opendaylight']
