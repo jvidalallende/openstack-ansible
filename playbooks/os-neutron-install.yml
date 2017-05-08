@@ -182,3 +182,14 @@
         name: "python-networking-odl"
         state: present
       when: inventory_hostname in groups['opendaylight']
+
+- name: Configure OpenDaylight as switch manager and controller
+  hosts: compute_hosts
+  tasks:
+    - name: Set fact with controller IP address
+      set_fact:
+        odl_ip: "{{ hostvars[groups['opendaylight'][0]]['ansible_eth1']['ipv4']['address'] }}"
+    - name: Set Opendaylight as manager
+      command: ovs-vsctl set-manager tcp:{{ odl_ip }}:6640
+    - name: Set Opendaylight as controller
+      command: ovs-vsctl set-controller br-int tcp:{{ odl_ip }}:6653
