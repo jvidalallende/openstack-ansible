@@ -163,33 +163,56 @@
     # This config is specific to Ubuntu
     - role: "opendaylight"
       install_method: "deb_repo"
+      extra_features: ['odl_netvirt_openstack']
+      nb_rest_port: 11111
       when:
         - ansible_pkg_mgr == 'apt'
         - inventory_hostname in groups['opendaylight']
     # This config is specific to CentOS
     - role: "opendaylight"
       install_method: "rpm_repo"
+      extra_features: ['odl_netvirt_openstack']
+      nb_rest_port: 11111
       when:
         - ansible_pkg_mgr == 'yum'
         - inventory_hostname in groups['opendaylight']
 
-- name: Install python-networking-odl package
+- name: Ensure neutron services are stopped
   hosts: neutron_all
   tasks:
-    - include: common-tasks/package-cache-proxy.yml
-    - name: Install python-networking-odl
-      package:
-        name: "python-networking-odl"
-        state: present
-      when: inventory_hostname in groups['opendaylight']
+    - service:
+        name: "neutron-server"
+        state: stopped
+      when: inventory_hostname in groups['neutron_server']
+    - service:
+        name: "neutron-l3-agent"
+        state: stopped
+        enabled: no
+      when: inventory_hostname in groups['neutron_agent']
+    - service:
+        name: "neutron-openvswitch-agent"
+        state: stopped
+        enabled: no
+      when: inventory_hostname in groups['neutron_agent']
 
-- name: Configure OpenDaylight as switch manager and controller
+- name: Configure Open vSwitch to be managed by OpenDaylight
   hosts: compute_hosts
   tasks:
+    - service:
+        name: "openvswitch-switch"
+        state: stopped
+    - name: Delete openvswitch logs
+      shell: rm -rf /var/log/openvswitch/*
+    - name: Delete openvswitch database
+      shell: rm -rf /etc/openvswitch/conf.db
+    - service:
+        name: "openvswitch-switch"
+        state: started
+        enabled: yes
     - name: Set fact with controller IP address
       set_fact:
         odl_ip: "{{ hostvars[groups['opendaylight'][0]]['ansible_eth1']['ipv4']['address'] }}"
     - name: Set Opendaylight as manager
       command: ovs-vsctl set-manager tcp:{{ odl_ip }}:6640
-    - name: Set Opendaylight as controller
-      command: ovs-vsctl set-controller br-int tcp:{{ odl_ip }}:6653
+    # Does it need to configure local ip??
+    # ovs-vsctl set Open_vSwitch . other_config:local_ip=<ip>
