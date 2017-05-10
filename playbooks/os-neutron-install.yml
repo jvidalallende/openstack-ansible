@@ -160,21 +160,11 @@
 - name: OpenDaylight installation
   hosts: neutron_all
   roles:
-    # This config is specific to Ubuntu
     - role: "opendaylight"
-      install_method: "deb_repo"
-      extra_features: ['odl_netvirt_openstack']
+      install_method: "{{ odl_install_method | default('deb_repo') }}"
+      extra_features: ['odl-netvirt-openstack']
       nb_rest_port: 11111
       when:
-        - ansible_pkg_mgr == 'apt'
-        - inventory_hostname in groups['opendaylight']
-    # This config is specific to CentOS
-    - role: "opendaylight"
-      install_method: "rpm_repo"
-      extra_features: ['odl_netvirt_openstack']
-      nb_rest_port: 11111
-      when:
-        - ansible_pkg_mgr == 'yum'
         - inventory_hostname in groups['opendaylight']
 
 - name: Ensure neutron services are stopped
