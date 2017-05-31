@@ -124,6 +124,15 @@
       neutron_overlay_network: "{{ _overlay_network }}"
       neutron_provider_networks: "{{ _provider_networks }}"
       neutron_local_ip: "{{ tunnel_address }}"
+      neutron_plugin_type: "ml2.odl"
+      neutron_opendaylight_conf_ini_overrides:
+        ml2:
+          tenant_network_types: "vxlan"
+          mechanism_drivers: "opendaylight"
+        ml2_odl:
+          username: "admin"
+          password: "admin"
+          url: "http://{{ hostvars[groups['neutron_server'][0]]['ansible_eth1']['ipv4']['address'] }}:8181/controller/nb/v2/neutron"
     - role: "bird"
       when:
         - "'neutron_calico_dhcp_agent' in group_names"
@@ -156,34 +165,6 @@
     bind_prefix: "{{ provider_network_bind_prefix|default('') }}"
   tags:
     - neutron
-
-- name: OpenDaylight installation
-  hosts: neutron_all
-  roles:
-    - role: "opendaylight"
-      install_method: "{{ odl_install_method | default('deb_repo') }}"
-      extra_features: ['odl-netvirt-openstack']
-      nb_rest_port: 11111
-      when:
-        - inventory_hostname in groups['opendaylight']
-
-- name: Ensure neutron services are stopped
-  hosts: neutron_all
-  tasks:
-    - service:
-        name: "neutron-server"
-        state: stopped
-      when: inventory_hostname in groups['neutron_server']
-    - service:
-        name: "neutron-l3-agent"
-        state: stopped
-        enabled: no
-      when: inventory_hostname in groups['neutron_agent']
-    - service:
-        name: "neutron-openvswitch-agent"
-        state: stopped
-        enabled: no
-      when: inventory_hostname in groups['neutron_agent']
 
 - name: Configure Open vSwitch to be managed by OpenDaylight
   hosts: compute_hosts
