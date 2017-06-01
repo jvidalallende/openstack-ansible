@@ -119,16 +119,14 @@
         _provider_networks: "{{ pndata }}"
       tags:
         - always
+
   roles:
     - role: "os_neutron"
       neutron_overlay_network: "{{ _overlay_network }}"
       neutron_provider_networks: "{{ _provider_networks }}"
       neutron_local_ip: "{{ tunnel_address }}"
-      neutron_plugin_type: "ml2.odl"
+      neutron_plugin_type: "ml2.opendaylight"
       neutron_opendaylight_conf_ini_overrides:
-        ml2:
-          tenant_network_types: "vxlan"
-          mechanism_drivers: "opendaylight"
         ml2_odl:
           username: "admin"
           password: "admin"
