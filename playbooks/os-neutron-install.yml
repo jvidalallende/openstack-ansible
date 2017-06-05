@@ -130,6 +130,7 @@
         ml2_odl:
           username: "admin"
           password: "admin"
+          port_binding_controller: "pseudo-agentdb-binding"
           url: "http://{{ hostvars[groups['neutron_server'][0]]['ansible_eth1']['ipv4']['address'] }}:8181/controller/nb/v2/neutron"
     - role: "bird"
       when:
@@ -163,25 +164,3 @@
     bind_prefix: "{{ provider_network_bind_prefix|default('') }}"
   tags:
     - neutron
-
-- name: Configure Open vSwitch to be managed by OpenDaylight
-  hosts: compute_hosts
-  tasks:
-    - service:
-        name: "openvswitch-switch"
-        state: stopped
-    - name: Delete openvswitch logs
-      shell: rm -rf /var/log/openvswitch/*
-    - name: Delete openvswitch database
-      shell: rm -rf /etc/openvswitch/conf.db
-    - service:
-        name: "openvswitch-switch"
-        state: started
-        enabled: yes
-    - name: Set fact with controller IP address
-      set_fact:
-        odl_ip: "{{ hostvars[groups['opendaylight'][0]]['ansible_eth1']['ipv4']['address'] }}"
-    - name: Set Opendaylight as manager
-      command: ovs-vsctl set-manager tcp:{{ odl_ip }}:6640
-    # Does it need to configure local ip??
-    # ovs-vsctl set Open_vSwitch . other_config:local_ip=<ip>
