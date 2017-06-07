@@ -119,19 +119,11 @@
         _provider_networks: "{{ pndata }}"
       tags:
         - always
-
   roles:
     - role: "os_neutron"
       neutron_overlay_network: "{{ _overlay_network }}"
       neutron_provider_networks: "{{ _provider_networks }}"
       neutron_local_ip: "{{ tunnel_address }}"
-      neutron_plugin_type: "ml2.opendaylight"
-      neutron_opendaylight_conf_ini_overrides:
-        ml2_odl:
-          username: "admin"
-          password: "admin"
-          port_binding_controller: "pseudo-agentdb-binding"
-          url: "http://{{ hostvars[groups['neutron_server'][0]]['ansible_eth1']['ipv4']['address'] }}:8181/controller/nb/v2/neutron"
     - role: "bird"
       when:
         - "'neutron_calico_dhcp_agent' in group_names"

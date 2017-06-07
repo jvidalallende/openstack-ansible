@@ -47,9 +47,6 @@ component_skel:
   neutron_server:
     belongs_to:
       - neutron_all
-  opendaylight:
-    belongs_to:
-      - neutron_all
 
 
 container_skel:
@@ -73,7 +70,6 @@ container_skel:
       - network_containers
     contains:
       - neutron_server
-      - opendaylight
     properties:
       service_name: neutron
 
