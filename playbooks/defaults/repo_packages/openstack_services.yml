@@ -122,7 +122,7 @@ keystone_git_project_group: keystone_all
 
 ## Neutron service
 neutron_git_repo: https://git.openstack.org/openstack/neutron
-neutron_git_install_branch: 4a316960f21e9f542c9fc9742276da4af5dba362 # HEAD of "master" as of 12.07.2017
+neutron_git_install_branch: 980451cd600e2d6fa77108c49392be605bb2123a # HEAD of "master" as of 07.07.2017
 neutron_git_project_group: neutron_all
 
 neutron_lbaas_git_repo: https://git.openstack.org/openstack/neutron-lbaas
